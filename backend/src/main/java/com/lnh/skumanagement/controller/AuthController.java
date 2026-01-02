@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/skus")
 @CrossOrigin(origins = "*")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
 
     private final AuthService authService;
@@ -38,5 +40,12 @@ public class AuthController {
     public ResponseEntity<Void> createUser(LoginRequest loginRequest) {
         authService.createUser(loginRequest);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/log-test")
+    public ResponseEntity<String> logTest() {
+        log.info("🔥 LOG TEST from Cloud Run");
+        System.out.println("🔥 STDOUT TEST from Cloud Run");
+        return ResponseEntity.ok("LOG TEST from Cloud Run");
     }
 }
