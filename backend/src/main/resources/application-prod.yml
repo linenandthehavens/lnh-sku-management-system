@@ -33,3 +33,23 @@ management:
   endpoint:
     health:
       show-details: when-authorized
+
+
+# Swagger/OpenAPI Configuration
+# Uses environment variable for backend URL
+springdoc:
+  swagger-ui:
+    servers:
+      - url: ${BACKEND_URL:http://localhost:8080}
+        description: Server
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+
+# Server Configuration
+server:
+  port: ${PORT:8080}
+  # Critical for HTTPS proxying through Cloud Run
+  forward-headers-strategy: framework
+  compression:
+    enabled: true
