@@ -1,0 +1,29 @@
+# Production Configuration for Linen & The Havens SKU Management System
+
+app:
+  lnh:
+    db:
+      url: jdbc:postgresql://yamabiko.proxy.rlwy.net:42967/railway
+      username: postgres
+      password: TmNDUoROPbFENWpIoevoOUsjhaaporMq
+      dialect: org.hibernate.dialect.PostgreSQLDialect
+      driver-class-name: org.postgresql.Driver
+
+logging:
+  level:
+    root: INFO
+    com.lnh.skumanagement: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+jwt:
+  expiration: 86400000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized

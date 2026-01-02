@@ -2,16 +2,19 @@ spring:
   application:
     name: lnh_sku_management_service
   datasource:
-    url: jdbc:mysql://localhost:3306/lnh_sku_db
-    username: root
-    password: root
+    url: ${app.lnh.db.url}
+    username: ${app.lnh.db.username}
+    password: ${app.lnh.db.password}
+    driver-class-name: ${app.lnh.db.driver-class-name}
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
+        dialect: ${app.lnh.db.dialect}
+        format_sql: false
+        use_sql_comments: false
   servlet:
     multipart:
       enabled: true
