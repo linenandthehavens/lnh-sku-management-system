@@ -14,6 +14,8 @@ jobs:
   deploy-backend:
     name: Build and Deploy Backend
     runs-on: ubuntu-latest
+    outputs:
+      backend_url: ${{ steps.backend-url.outputs.url }}
     
     steps:
       - name: Checkout code
@@ -49,26 +51,27 @@ jobs:
             --platform=managed \
             --region=${{ env.REGION }} \
             --allow-unauthenticated \
-            --set-env-vars="DATABASE_URL=${{ secrets.DATABASE_URL }}" \
-            --set-env-vars="DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}" \
-            --set-env-vars="DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" \
-            --set-env-vars="JWT_SECRET=${{ secrets.JWT_SECRET }}" \
-            --set-env-vars="FRONTEND_URL=${{ secrets.FRONTEND_URL }}" \
+            --set-env-vars="DATABASE_URL=${{ secrets.DATABASE_URL }},DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }},DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }},JWT_SECRET=${{ secrets.JWT_SECRET }},FRONTEND_URL=${{ secrets.FRONTEND_URL }}" \
             --memory=512Mi \
             --cpu=1 \
             --min-instances=0 \
             --max-instances=10 \
             --timeout=300
 
-      - name: Get Backend URL
+      - name: Get Backend URL and Configure BACKEND_URL
         id: backend-url
         run: |
           BACKEND_URL=$(gcloud run services describe lnh-backend --region=${{ env.REGION }} --format='value(status.url)')
           echo "url=$BACKEND_URL" >> $GITHUB_OUTPUT
-          echo "Backend deployed to: $BACKEND_URL"
-
-    outputs:
-      backend_url: ${{ steps.backend-url.outputs.url }}
+          echo "✅ Backend deployed to: $BACKEND_URL"
+          
+          # Update backend with BACKEND_URL environment variable (for Swagger)
+          echo "📝 Updating backend with BACKEND_URL environment variable..."
+          gcloud run services update lnh-backend \
+            --region=${{ env.REGION }} \
+            --update-env-vars="BACKEND_URL=$BACKEND_URL" \
+            --quiet
+          echo "✅ Backend configured with BACKEND_URL=$BACKEND_URL"
 
   deploy-frontend:
     name: Build and Deploy Frontend
@@ -79,10 +82,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create .env.production
+      - name: Create Frontend Environment File
         run: |
           cd frontend
-          echo "VITE_API_BASE_URL=${{ needs.deploy-backend.outputs.backend_url }}/api/skus" > .env.production
+          echo "VITE_API_URL=${{ needs.deploy-backend.outputs.backend_url }}" > .env.production
+          echo "✅ Created .env.production with:"
           cat .env.production
 
       - name: Authenticate to Google Cloud
@@ -124,6 +128,13 @@ jobs:
       - name: Get Frontend URL
         run: |
           FRONTEND_URL=$(gcloud run services describe lnh-frontend --region=${{ env.REGION }} --format='value(status.url)')
-          echo "✅ Deployment successful!"
-          echo "Frontend URL: $FRONTEND_URL"
-          echo "Backend URL: ${{ needs.deploy-backend.outputs.backend_url }}"
+          echo ""
+          echo "=========================================="
+          echo "🎉 DEPLOYMENT SUCCESSFUL!"
+          echo "=========================================="
+          echo "Backend:  ${{ needs.deploy-backend.outputs.backend_url }}"
+          echo "Frontend: $FRONTEND_URL"
+          echo ""
+          echo "📝 NOTE: Make sure FRONTEND_URL secret is set to:"
+          echo "   $FRONTEND_URL"
+          echo "=========================================="
