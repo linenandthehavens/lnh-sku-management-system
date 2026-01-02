@@ -11,7 +11,7 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  REGION: asia-south1  # Mumbai region (change if needed)
+  REGION: us-central1  # Mumbai region (change if needed)
   SERVICE_NAME: lnh-sku-frontend
   
 jobs:
