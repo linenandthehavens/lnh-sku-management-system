@@ -5,7 +5,16 @@ import SkuTable from './components/SkuTable'
 import Login from './components/Login'
 import { authService } from './utils/auth'
 
-const API_BASE_URL = 'http://localhost:8080/api/skus'
+// ✅ Read backend URL from environment variable (set during build)
+// Falls back to localhost for local development
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
+const API_ENDPOINT = `${API_BASE_URL}/api/skus`
+
+// Debug logging to verify configuration
+console.log('🚀 Frontend Configuration:')
+console.log('API Base URL:', API_BASE_URL)
+console.log('API Endpoint:', API_ENDPOINT)
+console.log('Environment:', import.meta.env.MODE)
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -34,18 +43,6 @@ function App() {
     checkAuth()
   }, [])
 
-  // Check authentication on mount
-  useEffect(() => {
-    const checkAuth = () => {
-      const authenticated = authService.isAuthenticated()
-      setIsAuthenticated(authenticated)
-      if (!authenticated) {
-        setLoading(false)
-      }
-    }
-    checkAuth()
-  }, [])
-
   useEffect(() => {
     if (isAuthenticated) {
       loadSkus()
@@ -59,14 +56,17 @@ function App() {
 
   const loadSkus = async () => {
     try {
-      const response = await axios.get(API_BASE_URL, {
+      console.log('📡 Fetching SKUs from:', API_ENDPOINT)
+      const response = await axios.get(API_ENDPOINT, {
         headers: authService.getAuthHeader()
       })
+      console.log('✅ Received', response.data.length, 'SKUs')
       setSkus(response.data)
       loadStyleNamesAndColours(response.data)
       setLoading(false)
     } catch (error) {
-      console.error('Error loading SKUs:', error)
+      console.error('❌ Error loading SKUs:', error)
+      console.error('Request URL was:', API_ENDPOINT)
       if (error.response?.status === 401) {
         handleLogout()
       }
@@ -76,7 +76,7 @@ function App() {
 
   const loadCategories = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/categories`, {
+      const response = await axios.get(`${API_ENDPOINT}/categories`, {
         headers: authService.getAuthHeader()
       })
       setCategories(response.data)
@@ -154,7 +154,7 @@ function App() {
   const handleDeleteSku = async (id) => {
     if (window.confirm('Are you sure you want to delete this SKU?')) {
       try {
-        await axios.delete(`${API_BASE_URL}/${id}`, {
+        await axios.delete(`${API_ENDPOINT}/${id}`, {
           headers: authService.getAuthHeader()
         })
         loadSkus()
@@ -173,16 +173,17 @@ function App() {
     // Debug: Log what we're about to send
     console.log('=== App.jsx - Data to be sent to backend ===')
     console.log('Full skuData:', JSON.stringify(skuData, null, 2))
+    console.log('API Endpoint:', API_ENDPOINT)
     console.log('===========================================')
     
     try {
       if (editingSku) {
-        const response = await axios.put(`${API_BASE_URL}/${editingSku.id}`, skuData, {
+        const response = await axios.put(`${API_ENDPOINT}/${editingSku.id}`, skuData, {
           headers: authService.getAuthHeader()
         })
         console.log('PUT Response:', response.data)
       } else {
-        const response = await axios.post(API_BASE_URL, skuData, {
+        const response = await axios.post(API_ENDPOINT, skuData, {
           headers: authService.getAuthHeader()
         })
         console.log('POST Response:', response.data)
