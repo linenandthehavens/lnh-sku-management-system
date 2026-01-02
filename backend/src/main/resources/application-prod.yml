@@ -19,7 +19,7 @@ logging:
 cors:
   allowed:
     # No fallback for frontend URL (must be set explicitly)
-    origins: ${FRONTEND_URL}
+    origins: "*"
 
 jwt:
   secret: ${JWT_SECRET}
