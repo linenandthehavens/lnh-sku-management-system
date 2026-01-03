@@ -11,10 +11,6 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 const API_ENDPOINT = `${API_BASE_URL}/api/skus`
 
 // Debug logging to verify configuration
-console.log('🚀 Frontend Configuration:')
-console.log('API Base URL:', API_BASE_URL)
-console.log('API Endpoint:', API_ENDPOINT)
-console.log('Environment:', import.meta.env.MODE)
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)

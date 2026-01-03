@@ -41,11 +41,4 @@ public class AuthController {
         authService.createUser(loginRequest);
         return ResponseEntity.noContent().build();
     }
-
-    @PostMapping("/log-test")
-    public ResponseEntity<String> logTest() {
-        log.info("🔥 LOG TEST from Cloud Run");
-        System.out.println("🔥 STDOUT TEST from Cloud Run");
-        return ResponseEntity.ok("LOG TEST from Cloud Run");
-    }
 }
