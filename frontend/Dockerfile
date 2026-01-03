@@ -6,6 +6,10 @@ FROM node:20-alpine AS build
 
 WORKDIR /app
 
+# Accept backend URL as build argument
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
 # Copy package files
 COPY package*.json ./
 
@@ -15,8 +19,31 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Build for production
+# Debug: Show what URL we're building with
+RUN echo "=======================================" && \
+    echo "🚀 Building Frontend" && \
+    echo "=======================================" && \
+    echo "VITE_API_URL: ${VITE_API_URL}" && \
+    echo "======================================="
+
+# Build for production (Vite reads VITE_API_URL from ENV)
 RUN npm run build
+
+# Debug: Verify backend URL is in bundle (not localhost)
+RUN echo "=======================================" && \
+    echo "🔍 Checking built bundle for URLs..." && \
+    echo "=======================================" && \
+    if grep -r "localhost:8080" dist/assets/*.js 2>/dev/null; then \
+      echo "❌ WARNING: localhost:8080 found in bundle!"; \
+    else \
+      echo "✅ No localhost:8080 found (good!)"; \
+    fi && \
+    if grep -r "lnh-backend" dist/assets/*.js 2>/dev/null | head -1; then \
+      echo "✅ Backend URL found in bundle!"; \
+    else \
+      echo "⚠️ Backend URL not found in bundle"; \
+    fi && \
+    echo "======================================="
 
 # Stage 2: Production with Nginx
 FROM nginx:alpine
