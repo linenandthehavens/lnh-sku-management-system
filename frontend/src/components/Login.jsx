@@ -3,6 +3,15 @@ import axios from 'axios';
 import { authService } from '../utils/auth';
 import './Login.css';
 
+// ✅ Read backend URL from environment variable (same as App.jsx)
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const LOGIN_ENDPOINT = `${API_BASE_URL}/api/skus/auth/login`;
+
+// Debug logging
+console.log('🔐 Login Configuration:');
+console.log('API Base URL:', API_BASE_URL);
+console.log('Login Endpoint:', LOGIN_ENDPOINT);
+
 function Login({ onLoginSuccess }) {
   const [formData, setFormData] = useState({
     userName: '',
@@ -27,16 +36,19 @@ function Login({ onLoginSuccess }) {
     setError('');
 
     try {
-      const response = await axios.post('http://localhost:8080/api/skus/auth/login', formData);
+      console.log('🔐 Attempting login to:', LOGIN_ENDPOINT);
+      const response = await axios.post(LOGIN_ENDPOINT, formData);
       
       if (response.data && response.data.token) {
+        console.log('✅ Login successful!');
         authService.setToken(response.data.token);
         onLoginSuccess();
       } else {
         setError('Login failed. Please try again.');
       }
     } catch (err) {
-      console.error('Login error:', err);
+      console.error('❌ Login error:', err);
+      console.error('Request was to:', LOGIN_ENDPOINT);
       if (err.response?.status === 401) {
         setError('Invalid username or password');
       } else if (err.response?.data?.message) {
