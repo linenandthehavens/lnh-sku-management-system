@@ -7,10 +7,7 @@ import './Login.css';
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 const LOGIN_ENDPOINT = `${API_BASE_URL}/api/skus/auth/login`;
 
-// Debug logging
-console.log('🔐 Login Configuration:');
-console.log('API Base URL:', API_BASE_URL);
-console.log('Login Endpoint:', LOGIN_ENDPOINT);
+
 
 function Login({ onLoginSuccess }) {
   const [formData, setFormData] = useState({
