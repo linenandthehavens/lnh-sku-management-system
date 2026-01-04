@@ -52,6 +52,10 @@ public class SkuEntity {
 
     private String supplier;
 
+    @NotBlank(message = "Size is required")
+    @Column(nullable = false)
+    private String size;
+
     @Column(name = "created_at",nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

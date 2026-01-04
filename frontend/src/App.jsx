@@ -11,6 +11,9 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 const API_ENDPOINT = `${API_BASE_URL}/api/skus`
 
 // Debug logging to verify configuration
+console.log('🚀 Frontend Configuration:')
+console.log('API Base URL:', API_BASE_URL)
+console.log('API Endpoint:', API_ENDPOINT)
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -19,6 +22,7 @@ function App() {
   const [categories, setCategories] = useState([])
   const [styleNames, setStyleNames] = useState([])
   const [colours, setColours] = useState([])
+  const [sizes, setSizes] = useState([])  // NEW: Sizes state
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editingSku, setEditingSku] = useState(null)
@@ -26,6 +30,7 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedStyleName, setSelectedStyleName] = useState('all')
   const [selectedColour, setSelectedColour] = useState('all')
+  const [selectedSize, setSelectedSize] = useState('all')  // NEW: Size filter state
 
   // Check authentication on mount
   useEffect(() => {
@@ -48,7 +53,7 @@ function App() {
 
   useEffect(() => {
     filterSkus()
-  }, [skus, searchTerm, selectedCategory, selectedStyleName, selectedColour])
+  }, [skus, searchTerm, selectedCategory, selectedStyleName, selectedColour, selectedSize])  // Added selectedSize
 
   const loadSkus = async () => {
     try {
@@ -58,7 +63,7 @@ function App() {
       })
       console.log('✅ Received', response.data.length, 'SKUs')
       setSkus(response.data)
-      loadStyleNamesAndColours(response.data)
+      loadStyleNamesColoursAndSizes(response.data)  // Updated function name
       setLoading(false)
     } catch (error) {
       console.error('❌ Error loading SKUs:', error)
@@ -84,7 +89,7 @@ function App() {
     }
   }
 
-  const loadStyleNamesAndColours = (skuData) => {
+  const loadStyleNamesColoursAndSizes = (skuData) => {
     // Extract unique style names
     const uniqueStyleNames = [...new Set(skuData.map(sku => sku.styleName).filter(Boolean))]
     setStyleNames(uniqueStyleNames.sort())
@@ -92,6 +97,15 @@ function App() {
     // Extract unique colours
     const uniqueColours = [...new Set(skuData.map(sku => sku.colour).filter(Boolean))]
     setColours(uniqueColours.sort())
+    
+    // NEW: Extract unique sizes
+    const uniqueSizes = [...new Set(skuData.map(sku => sku.size).filter(Boolean))]
+    // Sort sizes in proper order: S, M, L, XL, XXL, XXXL
+    const sizeOrder = ['S', 'M', 'L', 'XL', 'XXL', 'XXXL']
+    const sortedSizes = uniqueSizes.sort((a, b) => {
+      return sizeOrder.indexOf(a) - sizeOrder.indexOf(b)
+    })
+    setSizes(sortedSizes)
   }
 
   const handleLoginSuccess = () => {
@@ -107,6 +121,7 @@ function App() {
     setCategories([])
     setStyleNames([])
     setColours([])
+    setSizes([])  // NEW: Clear sizes
   }
 
   const filterSkus = () => {
@@ -118,7 +133,8 @@ function App() {
         sku.skuCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
         sku.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (sku.styleName && sku.styleName.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (sku.colour && sku.colour.toLowerCase().includes(searchTerm.toLowerCase()))
+        (sku.colour && sku.colour.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (sku.size && sku.size.toLowerCase().includes(searchTerm.toLowerCase()))  // NEW: Search by size
       )
     }
 
@@ -132,6 +148,11 @@ function App() {
 
     if (selectedColour !== 'all') {
       filtered = filtered.filter(sku => sku.colour === selectedColour)
+    }
+
+    // NEW: Filter by size
+    if (selectedSize !== 'all') {
+      filtered = filtered.filter(sku => sku.size === selectedSize)
     }
 
     setFilteredSkus(filtered)
@@ -263,7 +284,7 @@ function App() {
             <div className="search-box">
               <input
                 type="text"
-                placeholder="Search by name, SKU, category, style, or colour..."
+                placeholder="Search by name, SKU, category, style, colour, or size..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -301,6 +322,19 @@ function App() {
                 <option value="all">All Colours</option>
                 {colours.map(colour => (
                   <option key={colour} value={colour}>{colour}</option>
+                ))}
+              </select>
+            </div>
+            {/* NEW: Size filter dropdown */}
+            <div className="filter-group">
+              <label>Size:</label>
+              <select
+                value={selectedSize}
+                onChange={(e) => setSelectedSize(e.target.value)}
+              >
+                <option value="all">All Sizes</option>
+                {sizes.map(size => (
+                  <option key={size} value={size}>{size}</option>
                 ))}
               </select>
             </div>

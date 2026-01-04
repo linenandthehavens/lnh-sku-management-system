@@ -33,6 +33,8 @@ public class Sku {
     
     private String supplier;
 
+    private String size;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
