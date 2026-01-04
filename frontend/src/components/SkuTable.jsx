@@ -37,6 +37,7 @@ function SkuTable({ skus, onEdit, onDelete }) {
             <th>Product Name</th>
             <th>Style</th>
             <th>Color</th>
+            <th>Size</th> {/* NEW: Size column */}
             <th>Category</th>
             <th>Quantity</th>
             <th>Price (₹)</th>
@@ -68,6 +69,10 @@ function SkuTable({ skus, onEdit, onDelete }) {
                     {sku.colour}
                   </span>
                 ) : '—'}
+              </td>
+              {/* NEW: Size display */}
+              <td>
+                <span className="size-badge">{sku.size || '—'}</span>
               </td>
               <td>
                 <span className={`category-badge ${getCategoryClass(sku.category)}`}>

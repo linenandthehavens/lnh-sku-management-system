@@ -49,6 +49,7 @@ public class SkuServiceImpl implements SkuService {
         sku.setName(smartCapitalize.smartCapitalize(sku.getName()));
         sku.setColour(smartCapitalize.smartCapitalize(sku.getColour()));
         sku.setStyleName(smartCapitalize.smartCapitalize(sku.getStyleName()));
+        sku.setSize(smartCapitalize.smartCapitalize(sku.getSize()));
 
         return skuEntityMapper.toSku(skuRepository.save(skuEntityMapper.toSkuEntity(sku)));
     }
@@ -73,6 +74,7 @@ public class SkuServiceImpl implements SkuService {
         sku.setSupplier(skuDetails.getSupplier());
         sku.setStyleName(smartCapitalize.smartCapitalize(skuDetails.getStyleName()));
         sku.setColour(smartCapitalize.smartCapitalize(skuDetails.getColour()));
+        sku.setSize(smartCapitalize.smartCapitalize(skuDetails.getSize()));
         
         return skuEntityMapper.toSku(skuRepository.save(skuEntityMapper.toSkuEntity(sku)));
     }

@@ -7,11 +7,15 @@ function SkuForm({ sku, onSave, onClose }) {
     description: '',
     styleName: '',
     colour: '',
+    size: '',  // NEW: Size field
     quantity: '',
     price: '',
     category: '',
     supplier: ''
   })
+
+  // Available sizes
+  const SIZES = ['S', 'M', 'L', 'XL', 'XXL', 'XXXL']
 
   useEffect(() => {
     if (sku) {
@@ -21,6 +25,7 @@ function SkuForm({ sku, onSave, onClose }) {
         description: sku.description || '',
         styleName: sku.styleName || '',
         colour: sku.colour || '',
+        size: sku.size || '',  // NEW: Size from sku
         quantity: sku.quantity || '',
         price: sku.price || '',
         category: sku.category || '',
@@ -40,9 +45,9 @@ function SkuForm({ sku, onSave, onClose }) {
   const handleSubmit = (e) => {
     e.preventDefault()
     
-    // Validation - now includes styleName and colour
-    if (!formData.skuCode || !formData.name || !formData.styleName || !formData.colour || !formData.quantity || !formData.price || !formData.category) {
-      alert('Please fill in all required fields (SKU Code, Name, Style Name, Colour, Quantity, Price, Category)')
+    // Validation - now includes size
+    if (!formData.skuCode || !formData.name || !formData.styleName || !formData.colour || !formData.size || !formData.quantity || !formData.price || !formData.category) {
+      alert('Please fill in all required fields (SKU Code, Name, Style Name, Colour, Size, Quantity, Price, Category)')
       return
     }
 
@@ -93,7 +98,7 @@ function SkuForm({ sku, onSave, onClose }) {
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                placeholder="e.g., Premium cotton fabric, comfortable fit, size M, machine washable..."
+                placeholder="e.g., Premium cotton fabric, comfortable fit, machine washable..."
               />
             </div>
 
@@ -118,6 +123,36 @@ function SkuForm({ sku, onSave, onClose }) {
                   value={formData.colour}
                   onChange={handleChange}
                   placeholder="e.g., Navy Blue, White, Black, Red, Grey"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* NEW: Size Dropdown */}
+            <div className="form-row">
+              <div className="form-group">
+                <label>Size *</label>
+                <select
+                  name="size"
+                  value={formData.size}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select Size</option>
+                  {SIZES.map(size => (
+                    <option key={size} value={size}>{size}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Category *</label>
+                <input
+                  type="text"
+                  name="category"
+                  value={formData.category}
+                  onChange={handleChange}
+                  placeholder="e.g., Men's Shirts, Women's Dresses, Kids Wear, Undergarments"
                   required
                 />
               </div>
@@ -152,29 +187,15 @@ function SkuForm({ sku, onSave, onClose }) {
               </div>
             </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label>Category *</label>
-                <input
-                  type="text"
-                  name="category"
-                  value={formData.category}
-                  onChange={handleChange}
-                  placeholder="e.g., Men's Shirts, Women's Dresses, Kids Wear, Undergarments"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Supplier</label>
-                <input
-                  type="text"
-                  name="supplier"
-                  value={formData.supplier}
-                  onChange={handleChange}
-                  placeholder="e.g., Fashion Hub Pvt Ltd, Garment Manufacturers"
-                />
-              </div>
+            <div className="form-group">
+              <label>Supplier</label>
+              <input
+                type="text"
+                name="supplier"
+                value={formData.supplier}
+                onChange={handleChange}
+                placeholder="e.g., Fashion Hub Pvt Ltd, Garment Manufacturers"
+              />
             </div>
           </div>
 
