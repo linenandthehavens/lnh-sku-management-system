@@ -22,7 +22,7 @@ function App() {
   const [categories, setCategories] = useState([])
   const [styleNames, setStyleNames] = useState([])
   const [colours, setColours] = useState([])
-  const [sizes, setSizes] = useState([])  // NEW: Sizes state
+  const [sizes, setSizes] = useState([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editingSku, setEditingSku] = useState(null)
@@ -30,7 +30,7 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedStyleName, setSelectedStyleName] = useState('all')
   const [selectedColour, setSelectedColour] = useState('all')
-  const [selectedSize, setSelectedSize] = useState('all')  // NEW: Size filter state
+  const [selectedSize, setSelectedSize] = useState('all')
 
   // Check authentication on mount
   useEffect(() => {
@@ -53,7 +53,7 @@ function App() {
 
   useEffect(() => {
     filterSkus()
-  }, [skus, searchTerm, selectedCategory, selectedStyleName, selectedColour, selectedSize])  // Added selectedSize
+  }, [skus, searchTerm, selectedCategory, selectedStyleName, selectedColour, selectedSize])
 
   const loadSkus = async () => {
     try {
@@ -63,7 +63,7 @@ function App() {
       })
       console.log('✅ Received', response.data.length, 'SKUs')
       setSkus(response.data)
-      loadStyleNamesColoursAndSizes(response.data)  // Updated function name
+      loadStyleNamesColoursAndSizes(response.data)
       setLoading(false)
     } catch (error) {
       console.error('❌ Error loading SKUs:', error)
@@ -98,7 +98,7 @@ function App() {
     const uniqueColours = [...new Set(skuData.map(sku => sku.colour).filter(Boolean))]
     setColours(uniqueColours.sort())
     
-    // NEW: Extract unique sizes
+    // Extract unique sizes
     const uniqueSizes = [...new Set(skuData.map(sku => sku.size).filter(Boolean))]
     // Sort sizes in proper order: S, M, L, XL, XXL, XXXL
     const sizeOrder = ['S', 'M', 'L', 'XL', 'XXL', 'XXXL']
@@ -121,7 +121,7 @@ function App() {
     setCategories([])
     setStyleNames([])
     setColours([])
-    setSizes([])  // NEW: Clear sizes
+    setSizes([])
   }
 
   const filterSkus = () => {
@@ -134,7 +134,7 @@ function App() {
         sku.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (sku.styleName && sku.styleName.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (sku.colour && sku.colour.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (sku.size && sku.size.toLowerCase().includes(searchTerm.toLowerCase()))  // NEW: Search by size
+        (sku.size && sku.size.toLowerCase().includes(searchTerm.toLowerCase()))
       )
     }
 
@@ -150,7 +150,6 @@ function App() {
       filtered = filtered.filter(sku => sku.colour === selectedColour)
     }
 
-    // NEW: Filter by size
     if (selectedSize !== 'all') {
       filtered = filtered.filter(sku => sku.size === selectedSize)
     }
@@ -187,23 +186,15 @@ function App() {
   }
 
   const handleSaveSku = async (skuData) => {
-    // Debug: Log what we're about to send
-    console.log('=== App.jsx - Data to be sent to backend ===')
-    console.log('Full skuData:', JSON.stringify(skuData, null, 2))
-    console.log('API Endpoint:', API_ENDPOINT)
-    console.log('===========================================')
-    
     try {
       if (editingSku) {
-        const response = await axios.put(`${API_ENDPOINT}/${editingSku.id}`, skuData, {
+        await axios.put(`${API_ENDPOINT}/${editingSku.id}`, skuData, {
           headers: authService.getAuthHeader()
         })
-        console.log('PUT Response:', response.data)
       } else {
-        const response = await axios.post(API_ENDPOINT, skuData, {
+        await axios.post(API_ENDPOINT, skuData, {
           headers: authService.getAuthHeader()
         })
-        console.log('POST Response:', response.data)
       }
       setShowModal(false)
       setEditingSku(null)
@@ -240,7 +231,7 @@ function App() {
     return (
       <div className="app">
         <div className="container">
-          <div className="loading">Loading SKU data...</div>
+          <div className="loading">⏳ Loading SKU data...</div>
         </div>
       </div>
     )
@@ -249,107 +240,133 @@ function App() {
   return (
     <div className="app">
       <div className="container">
+        {/* Enhanced Header with Impressive Logo */}
         <header className="header">
           <div className="header-top">
-            <div className="header-branding">
-              <img src="/logo.png" alt="Linen & The Havens" className="header-logo" />
-              <div className="header-title-group">
-                <h1>Linen & The Havens</h1>
-                <p className="header-subtitle">SKU Management System</p>
+            <div className="header-top-content">
+              <div className="header-branding">
+                {/* Impressive Logo Container */}
+                <div className="logo-container">
+                  <div className="logo-circle">
+                    <img src="/logo.png" alt="Linen & The Havens" className="header-logo" />
+                  </div>
+                </div>
+                
+                {/* Company Title */}
+                <div className="header-title-group">
+                  <h1>Linen & The Havens</h1>
+                  <p className="header-subtitle">Private Limited</p>
+                  <p className="header-tagline">SKU Management System</p>
+                </div>
               </div>
+              
+              {/* Logout Button */}
+              <button className="btn btn-logout" onClick={handleLogout}>
+                🚪 Sign Out
+              </button>
             </div>
-            <button className="btn btn-logout" onClick={handleLogout}>
-              Sign Out
-            </button>
           </div>
           
+          {/* Stats Cards */}
           <div className="header-stats">
             <div className="stat-card">
-              <div className="stat-label">Total Items</div>
+              <div className="stat-label">📦 Total Items</div>
               <div className="stat-value">{stats.totalItems}</div>
             </div>
             <div className="stat-card">
-              <div className="stat-label">Total Value</div>
-              <div className="stat-value">₹{stats.totalValue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+              <div className="stat-label">💰 Total Value</div>
+              <div className="stat-value">₹{stats.totalValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
             </div>
             <div className="stat-card">
-              <div className="stat-label">Low Stock</div>
+              <div className="stat-label">⚠️ Low Stock</div>
               <div className="stat-value" style={{ color: 'var(--color-error)' }}>{stats.lowStock}</div>
             </div>
           </div>
         </header>
 
+        {/* Controls */}
         <div className="controls">
           <div className="controls-row">
-            <div className="search-box">
-              <input
-                type="text"
-                placeholder="Search by name, SKU, category, style, colour, or size..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+            {/* Search and Add Button */}
+            <div className="controls-main">
+              <div className="search-box">
+                <input
+                  type="text"
+                  placeholder="🔍 Search by name, SKU, category, style, colour, or size..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <button className="btn btn-primary" onClick={handleAddSku}>
+                ➕ Add SKU
+              </button>
             </div>
-            <div className="filter-group">
-              <label>Category:</label>
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-              >
-                <option value="all">All Categories</option>
-                {categories.map(category => (
-                  <option key={category} value={category}>{category}</option>
-                ))}
-              </select>
+            
+            {/* Filters */}
+            <div className="filters-row">
+              <div className="filter-group">
+                <label>📂 Category</label>
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                >
+                  <option value="all">All Categories</option>
+                  {categories.map(category => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="filter-group">
+                <label>✨ Style</label>
+                <select
+                  value={selectedStyleName}
+                  onChange={(e) => setSelectedStyleName(e.target.value)}
+                >
+                  <option value="all">All Styles</option>
+                  {styleNames.map(style => (
+                    <option key={style} value={style}>{style}</option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="filter-group">
+                <label>🎨 Colour</label>
+                <select
+                  value={selectedColour}
+                  onChange={(e) => setSelectedColour(e.target.value)}
+                >
+                  <option value="all">All Colours</option>
+                  {colours.map(colour => (
+                    <option key={colour} value={colour}>{colour}</option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="filter-group">
+                <label>📏 Size</label>
+                <select
+                  value={selectedSize}
+                  onChange={(e) => setSelectedSize(e.target.value)}
+                >
+                  <option value="all">All Sizes</option>
+                  {sizes.map(size => (
+                    <option key={size} value={size}>{size}</option>
+                  ))}
+                </select>
+              </div>
             </div>
-            <div className="filter-group">
-              <label>Style:</label>
-              <select
-                value={selectedStyleName}
-                onChange={(e) => setSelectedStyleName(e.target.value)}
-              >
-                <option value="all">All Styles</option>
-                {styleNames.map(style => (
-                  <option key={style} value={style}>{style}</option>
-                ))}
-              </select>
-            </div>
-            <div className="filter-group">
-              <label>Colour:</label>
-              <select
-                value={selectedColour}
-                onChange={(e) => setSelectedColour(e.target.value)}
-              >
-                <option value="all">All Colours</option>
-                {colours.map(colour => (
-                  <option key={colour} value={colour}>{colour}</option>
-                ))}
-              </select>
-            </div>
-            {/* NEW: Size filter dropdown */}
-            <div className="filter-group">
-              <label>Size:</label>
-              <select
-                value={selectedSize}
-                onChange={(e) => setSelectedSize(e.target.value)}
-              >
-                <option value="all">All Sizes</option>
-                {sizes.map(size => (
-                  <option key={size} value={size}>{size}</option>
-                ))}
-              </select>
-            </div>
-            <button className="btn btn-primary" onClick={handleAddSku}>
-              + Add SKU
-            </button>
           </div>
         </div>
 
+        {/* SKU Table */}
         <SkuTable
           skus={filteredSkus}
           onEdit={handleEditSku}
           onDelete={handleDeleteSku}
         />
 
+        {/* Modal */}
         {showModal && (
           <SkuForm
             sku={editingSku}
