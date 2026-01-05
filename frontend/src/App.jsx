@@ -3,6 +3,7 @@ import axios from 'axios'
 import SkuForm from './components/SkuForm'
 import SkuTable from './components/SkuTable'
 import Login from './components/Login'
+import DeleteConfirmModal from './components/DeleteConfirmModal'
 import { authService } from './utils/auth'
 
 // ✅ Read backend URL from environment variable (set during build)
@@ -31,6 +32,10 @@ function App() {
   const [selectedStyleName, setSelectedStyleName] = useState('all')
   const [selectedColour, setSelectedColour] = useState('all')
   const [selectedSize, setSelectedSize] = useState('all')
+  
+  // Delete confirmation modal state
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [skuToDelete, setSkuToDelete] = useState(null)
 
   // Check authentication on mount
   useEffect(() => {
@@ -167,22 +172,62 @@ function App() {
     setShowModal(true)
   }
 
-  const handleDeleteSku = async (id) => {
-    if (window.confirm('Are you sure you want to delete this SKU?')) {
-      try {
-        await axios.delete(`${API_ENDPOINT}/${id}`, {
-          headers: authService.getAuthHeader()
-        })
-        loadSkus()
-      } catch (error) {
-        console.error('Error deleting SKU:', error)
-        if (error.response?.status === 401) {
-          handleLogout()
-        } else {
-          alert('Failed to delete SKU')
-        }
-      }
+  const handleDeleteSku = (skuOrId) => {
+    // Support both old (just ID) and new (full SKU object) formats
+    let sku;
+    
+    if (typeof skuOrId === 'object' && skuOrId !== null) {
+      // New format: full SKU object passed
+      sku = skuOrId;
+      console.log('✅ Received full SKU object:', sku);
+    } else {
+      // Old format: just ID passed - find the full SKU object
+      sku = skus.find(s => s.id === skuOrId);
+      console.log('⚠️ Received only ID, found SKU:', sku);
     }
+    
+    console.log('📋 SKU to delete:', {
+      id: sku?.id,
+      name: sku?.name,
+      skuCode: sku?.skuCode
+    });
+    
+    // Show custom delete confirmation modal
+    setSkuToDelete(sku);
+    setShowDeleteModal(true);
+  }
+
+  const confirmDelete = async () => {
+    if (!skuToDelete) return
+
+    try {
+      await axios.delete(`${API_ENDPOINT}/${skuToDelete.id}`, {
+        headers: authService.getAuthHeader()
+      })
+      
+      // Close modal and clear state
+      setShowDeleteModal(false)
+      setSkuToDelete(null)
+      
+      // Reload SKUs
+      loadSkus()
+    } catch (error) {
+      console.error('Error deleting SKU:', error)
+      if (error.response?.status === 401) {
+        handleLogout()
+      } else {
+        alert('Failed to delete SKU')
+      }
+      
+      // Close modal even on error
+      setShowDeleteModal(false)
+      setSkuToDelete(null)
+    }
+  }
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false)
+    setSkuToDelete(null)
   }
 
   const handleSaveSku = async (skuData) => {
@@ -240,16 +285,14 @@ function App() {
   return (
     <div className="app">
       <div className="container">
-        {/* Enhanced Header with Impressive Logo */}
+        {/* Enhanced Header with Logo */}
         <header className="header">
           <div className="header-top">
             <div className="header-top-content">
               <div className="header-branding">
-                {/* Impressive Logo Container */}
+                {/* Logo Container */}
                 <div className="logo-container">
-                  <div className="logo-circle">
-                    <img src="/logo.png" alt="Linen & The Havens" className="header-logo" />
-                  </div>
+                  <img src="/logo.png" alt="Linen & The Havens" className="header-logo" />
                 </div>
                 
                 {/* Company Title */}
@@ -366,7 +409,7 @@ function App() {
           onDelete={handleDeleteSku}
         />
 
-        {/* Modal */}
+        {/* SKU Form Modal */}
         {showModal && (
           <SkuForm
             sku={editingSku}
@@ -377,6 +420,15 @@ function App() {
             }}
           />
         )}
+
+        {/* Custom Delete Confirmation Modal */}
+        <DeleteConfirmModal
+          isOpen={showDeleteModal}
+          skuName={skuToDelete?.name}
+          skuCode={skuToDelete?.skuCode}
+          onConfirm={confirmDelete}
+          onCancel={cancelDelete}
+        />
       </div>
     </div>
   )
