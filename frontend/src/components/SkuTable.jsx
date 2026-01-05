@@ -106,7 +106,7 @@ function SkuTable({ skus, onEdit, onDelete }) {
                   </button>
                   <button 
                     className="btn btn-sm btn-danger"
-                    onClick={() => onDelete(sku.id)}
+                    onClick={() => onDelete(sku)}
                   >
                     🗑️ Delete
                   </button>
@@ -201,7 +201,7 @@ function SkuTable({ skus, onEdit, onDelete }) {
               </button>
               <button 
                 className="btn btn-sm btn-danger"
-                onClick={() => onDelete(sku.id)}
+                onClick={() => onDelete(sku)}
               >
                 🗑️ Delete
               </button>
